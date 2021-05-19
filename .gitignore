@@ -1,0 +1,7 @@
+.pytest_cache
+.env
+__pycache__
+.history
+.hypothesis/
+build/
+reports/
