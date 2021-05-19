@@ -58,8 +58,17 @@ You'll need to do this everytime you open a new terminal, or [learn how to set t
 
 Otherwise, you can build, test, and deploy on your local environment. 
 
-## Deploy to a testnet
+## Deploy to a testnet / Scripts
 
+```
+brownie run scripts/1_deploy_lottery.py
+brownie run scripts/2_start_lottery.py
+brownie run scripts/3_enter_lottery.py
+brownie run scripts/4_end_lottery.py
+```
+This will deploy your lottery, fund it with LINK, start your lottery, you'll enter it, and then end your lottery. You can also work with the console to do these. 
+
+You can deploy and work with a local network by deploying mocks. 
 ## Testing
 
 There are 2 types of tests in this project. 
@@ -79,9 +88,6 @@ brownie test --network <network>
 For more information on effective testing with Chainlink, check out [Testing Smart Contracts](https://blog.chain.link/testing-chainlink-smart-contracts/)
 
 Tests are really robust here! They work for local development and testnets. There are a few key differences between the testnets and the local networks. We utilize mocks so we can work with fake oracles on our testnets. 
-
-There is a `test_unnecessary` folder, which is a good exersize for learning some of the nitty-gritty of smart contract development. It's overkill, so pytest will skip them intentionally. It also has a `test_samples` folder, which shows an example Chainlink API call transaction receipt. 
-
 
 ### To test development / local
 ```bash
