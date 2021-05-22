@@ -20,7 +20,9 @@ from scripts.helpful_scripts import (
 def get_eth_usd_price_feed_address():
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         if len(MockV3Aggregator) == 0:
-            mock_price_feed = MockV3Aggregator.deploy(18, 2000, {"from": accounts[0]})
+            mock_price_feed = MockV3Aggregator.deploy(
+                8, 200000000000, {"from": accounts[0]}
+            )
             return mock_price_feed.address
         else:
             return MockV3Aggregator[len(MockV3Aggregator) - 1].address

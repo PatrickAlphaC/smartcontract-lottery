@@ -39,7 +39,7 @@ def test_get_entrance_fee(deploy_lottery_contract):
     # 2000 is the inital of the eth / usd feed
     # usdEntryFee is 50
     # so we do 2000/1 is 50/x = 0.025 ETH == $50
-    assert eth_usd_price == 2000
+    assert eth_usd_price == 2000000000000000000000
     assert price == 25000000000000000
 
 

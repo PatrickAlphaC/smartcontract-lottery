@@ -40,20 +40,16 @@ contract Lottery is VRFConsumerBase, Ownable {
     } 
 
     function getEntranceFee() public view returns(uint256){
-        uint256 precision = 1 * 10 ** 18; 
-        uint256 price = getLatestEthUsdPrice(); 
-        uint256 costToEnter = (precision / price) * (usdEntryFee);
+        uint256 precision = 1 * 10 ** 36; 
+        uint256 price = getLatestEthUsdPrice(); // 2000_000000000000000000
+        // uint256 costToEnter = usdEntryFee * 10 ** 18 / price; This would be 0.25
+        uint256 costToEnter = usdEntryFee * precision / price; 
         return costToEnter;
     }
 
     function getLatestEthUsdPrice() public view returns (uint256) {
-        (
-            uint80 roundID, 
-            int price,
-            uint startedAt,
-            uint timeStamp,
-            uint80 answeredInRound
-        ) = ethUsdPriceFeed.latestRoundData();
+        (,int price,,,) = ethUsdPriceFeed.latestRoundData();
+        price = price * 10000000000;
         return uint256(price);
     }
     

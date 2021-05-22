@@ -10,8 +10,9 @@ from scripts.helpful_scripts import (
     get_account,
 )
 
-DECIMALS = 18
-INITIAL_VALUE = 2000
+DECIMALS = 8
+# This is 2,000
+INITIAL_VALUE = 200000000000
 
 
 def main():
