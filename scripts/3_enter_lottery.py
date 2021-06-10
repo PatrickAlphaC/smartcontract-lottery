@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 from brownie import Lottery, accounts, config
-from scripts.helpful_scripts import fund_with_link
 
 
 def main():

@@ -1,5 +1,3 @@
-import time
-
 import pytest
 from brownie import Lottery, exceptions, network
 from scripts.helpful_scripts import get_account, LOCAL_BLOCKCHAIN_ENVIRONMENTS

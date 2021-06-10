@@ -2,48 +2,70 @@
 
 This is a repo to work with and create a truely random smart contract lottery in a python environment. If you're brand new to solidity, be sure to check out [FreeCodeCamp](https://www.freecodecamp.org/news/tag/solidity/). If you're new to brownie, check out the [Brownie](https://eth-brownie.readthedocs.io/en/stable/) documentation.  If you're brand new to Chainlink, check out the beginner walkthroughs in remix to [learn the basics.](https://docs.chain.link/docs/beginners-tutorial)
 
+- [SmartContract Lottery](#smartcontract-lottery)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Testnet Development](#testnet-development)
+    - [With environment variables](#with-environment-variables)
+    - [Without environment variables](#without-environment-variables)
+  - [Local Development](#local-development)
+  - [Deploy to a testnet / Scripts](#deploy-to-a-testnet--scripts)
+  - [Testing](#testing)
+    - [To test development / local](#to-test-development--local)
+    - [To test mainnet-fork](#to-test-mainnet-fork)
+    - [To test a testnet](#to-test-a-testnet)
+  - [Adding additional Chains](#adding-additional-chains)
+  - [Linting](#linting)
+  - [Resources](#resources)
+  - [License](#license)
+
 ## Prerequisites
 
 Please install or have installed the following:
 
 - [nodejs and npm](https://nodejs.org/en/download/)
 - [python](https://www.python.org/downloads/)
-
 ## Installation
 
 1. [Install Brownie](https://eth-brownie.readthedocs.io/en/stable/install.html), if you haven't already. Here is a simple way to install brownie.
 
+
 ```bash
-pip install eth-brownie
-```
-Or, if that doesn't work, via pipx
-```bash
-pip install --user pipx
-pipx ensurepath
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
 # restart your terminal
 pipx install eth-brownie
 ```
-
-2. [Install ganache-cli](https://www.npmjs.com/package/ganache-cli)
-
+Or, if that doesn't work, via pip
 ```bash
-npm install -g ganache-cli
+pip install eth-brownie
 ```
 
-3. Download the mix and install dependancies. 
+2. Download the mix and install dependancies. 
 
 ```bash
-git clone https://github.com/PatrickAlphaC/smartcontract-lottery
-cd smartcontract-lottery
+brownie bake chainlink-mix
+cd chainlink-mix
 pip install -r requirements.txt
 ```
 
-### Environment Variables
+This will open up a new Chainlink project. Or, you can clone from source:
 
-If you want to be able to deploy to testnets, set the following environment variables. You can [learn more about setting environment variables from this linked Twilio blog.](https://www.twilio.com/blog/2017/01/how-to-set-environment-variables.html) 
+```bash
+git clone https://github.com/PatrickAlphaC/chainlink-mix
+cd chainlink-mix 
+```
 
-- `WEB3_INFURA_PROJECT_ID`: Your project ID from [Infura](https://infura.io/). You can signup to get a free key. You can [follow this guide](https://ethereumico.io/knowledge-base/infura-api-key-guide/) to getting a project key.
-- `PRIVATE_KEY`: From your ethereum wallet like [metamask](https://metamask.io/). You can follow [this guide](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-Export-an-Account-Private-Key) to get your private key. Just note, if pulling from metamask, you will have to append an `0x` to the start, like so: `0xasfasdfasdfasfsa`
+## Testnet Development
+If you want to be able to deploy to testnets, do the following. 
+
+### With environment variables
+
+Set your `WEB3_INFURA_PROJECT_ID`, and `PRIVATE_KEY` [environment variables](https://www.twilio.com/blog/2017/01/how-to-set-environment-variables.html). 
+
+You can get a `WEB3_INFURA_PROJECT_ID` by getting a free trial of [Infura](https://infura.io/). At the moment, it does need to be infura with brownie. If you get lost, you can [follow this guide](https://ethereumico.io/knowledge-base/infura-api-key-guide/) to getting a project key. You can find your `PRIVATE_KEY` from your ethereum wallet like [metamask](https://metamask.io/). 
+
+You'll also need testnet rinkeby ETH and LINK. You can get LINK and ETH into your wallet by using the [rinkeby faucets located here](https://docs.chain.link/docs/link-token-contracts#rinkeby). If you're new to this, [watch this video.](https://www.youtube.com/watch?v=P7FX_1PePX0)
 
 You can add your environment variables to the `.env` file:
 
@@ -52,11 +74,47 @@ export WEB3_INFURA_PROJECT_ID=<PROJECT_ID>
 export PRIVATE_KEY=<PRIVATE_KEY>
 ```
 
-AND THEN RUN `source .env` to activate them. 
-You'll need to do this everytime you open a new terminal, or [learn how to set them easier](https://www.twilio.com/blog/2017/01/how-to-set-environment-variables.html)
+AND THEN RUN `source .env` TO ACTIVATE THE ENV VARIABLES
+(You'll need to do this everytime you open a new terminal, or [learn how to set them easier](https://www.twilio.com/blog/2017/01/how-to-set-environment-variables.html))
 
+> DO NOT SEND YOUR PRIVATE KEY WITH FUNDS IN IT ONTO GITHUB
+
+### Without environment variables
+
+Add your account by doing the following:
+```
+brownie accounts new <some_name_you_decide>
+```
+You'll be prompted to add your private key, and a password. 
+Then, in your code, you'll want to use `load` instead of add when getting an account.
+```python
+account = accounts.load("some_name_you_decide")
+```
+Then you'll want to add your RPC_URL to the network of choice. For example:
+```bash
+brownie networks modify rinkeby host=https://your_url_here
+```
+If the network you want doesn't already exist, see [the below section](#adding-additional-chains)
 
 Otherwise, you can build, test, and deploy on your local environment. 
+
+## Local Development
+
+For local testing [install ganache-cli](https://www.npmjs.com/package/ganache-cli)
+```bash
+npm install -g ganache-cli
+```
+or
+```bash
+yarn add global ganache-cli
+```
+
+All the scripts are designed to work locally or on a testnet. You can add a ganache-cli or ganache UI chain like so: 
+```
+brownie networks add Ethereum ganache host=http://localhost:8545 chainid=1337
+```
+And update the brownie config accordingly. There is a `deploy_mocks` script that will launch and deploy mock Oracles, VRFCoordinators, Link Tokens, and Price Feeds on a Local Blockchain. 
+
 
 ## Deploy to a testnet / Scripts
 
@@ -122,7 +180,7 @@ brownie networks add development binance-fork cmd=ganache-cli host=http://127.0.
 ```
 pip install black 
 pip install autoflake
-autoflake --in-place --remove-unused-variables -r .
+autoflake --in-place --remove-unused-variables --remove-all-unused-imports -r .
 black .
 ```
 

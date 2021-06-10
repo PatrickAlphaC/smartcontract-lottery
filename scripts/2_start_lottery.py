@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from brownie import Lottery, accounts, config, network
+from brownie import Lottery, accounts, config
 from scripts.helpful_scripts import fund_with_link
 
 lottery_enum = {0: "OPEN", 1: "CLOSED", 2: "CALCULATING_WINNER"}

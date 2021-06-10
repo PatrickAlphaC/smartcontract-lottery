@@ -1,7 +1,7 @@
 import time
 
 import pytest
-from brownie import Lottery, exceptions, network
+from brownie import Lottery, network
 from scripts.helpful_scripts import get_account, LOCAL_BLOCKCHAIN_ENVIRONMENTS
 
 STATIC_SEED = 123
@@ -42,7 +42,7 @@ def test_can_pick_winner(
     lottery.enter({"from": account, "value": lottery.getEntranceFee()})
     get_link_token.transfer(lottery.address, chainlink_fee * 2, {"from": account})
     transaction_receipt = lottery.endLottery(STATIC_SEED, {"from": account})
-    requestId = transaction_receipt.events["RequestedRandomness"]["requestId"]
+    transaction_receipt.events["RequestedRandomness"]["requestId"]
     time.sleep(60)
     assert lottery.recentWinner() == account
     assert lottery.balance() == 0
