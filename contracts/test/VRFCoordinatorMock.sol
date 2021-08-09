@@ -5,19 +5,23 @@ import "@chainlink/contracts/src/v0.6/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
 
 contract VRFCoordinatorMock {
-
     LinkTokenInterface public LINK;
 
-    event RandomnessRequest(address indexed sender, bytes32 indexed keyHash, uint256 indexed seed);
+    event RandomnessRequest(
+        address indexed sender,
+        bytes32 indexed keyHash,
+        uint256 indexed seed
+    );
 
     constructor(address linkAddress) public {
         LINK = LinkTokenInterface(linkAddress);
     }
 
-    function onTokenTransfer(address sender, uint256 fee, bytes memory _data)
-        public
-        onlyLINK
-    {
+    function onTokenTransfer(
+        address sender,
+        uint256 fee,
+        bytes memory _data
+    ) public onlyLINK {
         (bytes32 keyHash, uint256 seed) = abi.decode(_data, (bytes32, uint256));
         emit RandomnessRequest(sender, keyHash, seed);
     }
@@ -28,10 +32,14 @@ contract VRFCoordinatorMock {
         address consumerContract
     ) public {
         VRFConsumerBase v;
-        bytes memory resp = abi.encodeWithSelector(v.rawFulfillRandomness.selector, requestId, randomness);
+        bytes memory resp = abi.encodeWithSelector(
+            v.rawFulfillRandomness.selector,
+            requestId,
+            randomness
+        );
         uint256 b = 206000;
         require(gasleft() >= b, "not enough gas for consumer");
-        (bool success,) = consumerContract.call(resp);
+        (bool success, ) = consumerContract.call(resp);
     }
 
     modifier onlyLINK() {

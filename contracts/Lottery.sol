@@ -1,12 +1,15 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.6;
 
-import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
-import "@chainlink/contracts/src/v0.6/vendor/SafeMathChainlink.sol";
 import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
 
 contract Lottery is VRFConsumerBase, Ownable {
-    using SafeMathChainlink for uint256;
+    address payable[] public players;
+    address payable public recentWinner;
+    uint256 public randomness;
+    uint256 public usdEntryFee;
     AggregatorV3Interface internal ethUsdPriceFeed;
     enum LOTTERY_STATE {
         OPEN,
@@ -14,80 +17,66 @@ contract Lottery is VRFConsumerBase, Ownable {
         CALCULATING_WINNER
     }
     LOTTERY_STATE public lottery_state;
-    uint256 public lotteryId;
-    address payable[] public players;
-    address public recentWinner;
-    // 0.1 LINK
-    uint256 public fee = 100000000000000000;
-    uint256 public usdEntryFee;
-    bytes32 public keyHash;
-    uint256 public randomness;
+    uint256 public fee;
+    bytes32 public keyhash;
     event RequestedRandomness(bytes32 requestId);
 
+    // 0
+    // 1
+    // 2
+
     constructor(
-        address ethUsdPriceFeedAddress,
+        address _priceFeedAddress,
         address _vrfCoordinator,
         address _link,
-        bytes32 _keyHash
-    )
-        public
-        VRFConsumerBase(
-            _vrfCoordinator, // VRF Coordinator
-            _link // LINK Token
-        )
-    {
-        ethUsdPriceFeed = AggregatorV3Interface(ethUsdPriceFeedAddress);
-        lotteryId = 1;
-        lottery_state = LOTTERY_STATE.CLOSED;
-        keyHash = _keyHash;
+        uint256 _fee,
+        bytes32 _keyhash
+    ) public VRFConsumerBase(_vrfCoordinator, _link) {
         usdEntryFee = 50 * (10**18);
+        ethUsdPriceFeed = AggregatorV3Interface(_priceFeedAddress);
+        lottery_state = LOTTERY_STATE.CLOSED;
+        fee = _fee;
+        keyhash = _keyhash;
     }
 
     function enter() public payable {
-        require(msg.value >= getEntranceFee(), "Not enough ETH to enter!");
+        // $50 minimum
         require(lottery_state == LOTTERY_STATE.OPEN);
+        require(msg.value >= getEntranceFee(), "Not enough ETH!");
         players.push(msg.sender);
     }
 
     function getEntranceFee() public view returns (uint256) {
-        uint256 precision = 1 * 10**18;
-        uint256 price = getLatestEthUsdPrice(); // 2000_000000000000000000
-        uint256 costToEnter = (usdEntryFee * precision) / price;
-        return costToEnter;
-    }
-
-    function getLatestEthUsdPrice() public view returns (uint256) {
         (, int256 price, , , ) = ethUsdPriceFeed.latestRoundData();
-        price = price * 10000000000;
-        return uint256(price);
+        uint256 adjustedPrice = uint256(price) * 10**10; // 18 decimals
+        // $50, $2,000 / ETH
+        // 50/2,000
+        // 50 * 100000 / 2000
+        uint256 costToEnter = (usdEntryFee * 10**18) / adjustedPrice;
+        return costToEnter;
     }
 
     function startLottery() public onlyOwner {
         require(
             lottery_state == LOTTERY_STATE.CLOSED,
-            "can't start a new lottery yet"
+            "Can't start a new lottery yet!"
         );
         lottery_state = LOTTERY_STATE.OPEN;
-        randomness = 0;
     }
 
     function endLottery() public onlyOwner {
-        require(
-            lottery_state == LOTTERY_STATE.OPEN,
-            "Can't end a lottery that hasnt started!"
-        );
+        // uint256(
+        //     keccack256(
+        //         abi.encodePacked(
+        //             nonce, // nonce is preditable (aka, transaction number)
+        //             msg.sender, // msg.sender is predictable
+        //             block.difficulty, // can actually be manipulated by the miners!
+        //             block.timestamp // timestamp is predictable
+        //         )
+        //     )
+        // ) % players.length;
         lottery_state = LOTTERY_STATE.CALCULATING_WINNER;
-        pickWinner();
-    }
-
-    function pickWinner() private returns (bytes32) {
-        // DONT do something like this:
-        // uint(keccak256(abi.encodePacked(nonce, msg.sender, block.difficulty, block.timestamp))) % players.length;
-        require(
-            lottery_state == LOTTERY_STATE.CALCULATING_WINNER,
-            "You aren't at that stage yet!"
-        );
-        bytes32 requestId = requestRandomness(keyHash, fee);
+        bytes32 requestId = requestRandomness(keyhash, fee);
         emit RequestedRandomness(requestId);
     }
 
@@ -97,22 +86,15 @@ contract Lottery is VRFConsumerBase, Ownable {
     {
         require(
             lottery_state == LOTTERY_STATE.CALCULATING_WINNER,
-            "You aren't at that stage yet!"
+            "You aren't there yet!"
         );
         require(_randomness > 0, "random-not-found");
-        uint256 index = _randomness % players.length;
-        recentWinner = players[index];
-        players[index].transfer(address(this).balance);
+        uint256 indexOfWinner = _randomness % players.length;
+        recentWinner = players[indexOfWinner];
+        recentWinner.transfer(address(this).balance);
+        // Reset
         players = new address payable[](0);
         lottery_state = LOTTERY_STATE.CLOSED;
-        randomness = randomness;
-    }
-
-    function get_players() public view returns (address payable[] memory) {
-        return players;
-    }
-
-    function get_pot() public view returns (uint256) {
-        return address(this).balance;
+        randomness = _randomness;
     }
 }
