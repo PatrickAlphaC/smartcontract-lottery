@@ -72,14 +72,14 @@ def test_can_pick_winner_correctly():
     lottery.enter({"from": get_account(index=1), "value": lottery.getEntranceFee()})
     lottery.enter({"from": get_account(index=2), "value": lottery.getEntranceFee()})
     fund_with_link(lottery)
+    starting_balance_of_account = account.balance()
+    balance_of_lottery = lottery.balance()
     transaction = lottery.endLottery({"from": account})
     request_id = transaction.events["RequestedRandomness"]["requestId"]
     STATIC_RNG = 777
     get_contract("vrf_coordinator").callBackWithRandomness(
         request_id, STATIC_RNG, lottery.address, {"from": account}
     )
-    starting_balance_of_account = account.balance()
-    balance_of_lottery = lottery.balance()
     # 777 % 3 = 0
     assert lottery.recentWinner() == account
     assert lottery.balance() == 0
