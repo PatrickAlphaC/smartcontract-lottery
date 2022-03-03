@@ -21,5 +21,6 @@ networks:
     verify: True
   mainnet-fork:
     eth_usd_price_feed: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419'
+    verify: False
 wallets:
   from_key: ${PRIVATE_KEY}
