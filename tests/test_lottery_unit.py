@@ -2,14 +2,17 @@ from scripts.helpful_scripts import (
     get_account,
     fund_with_link,
     get_contract,
+    LOCAL_BLOCKCHAIN_ENVIRONMENTS,
 )
-from brownie import exceptions
+from brownie import exceptions, network
 from web3 import Web3
 import pytest
 
 
-def test_get_entrance_fee(check_local_blockchain_envs, lottery_contract):
-    # Arrange (by fixtures)
+def test_get_entrance_fee(lottery_contract):
+    # Arrange
+    if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        pytest.skip()
 
     # Act
     # 2,000 eth / usd
@@ -21,8 +24,10 @@ def test_get_entrance_fee(check_local_blockchain_envs, lottery_contract):
     assert expected_entrance_fee == entrance_fee
 
 
-def test_cant_enter_unless_started(check_local_blockchain_envs, lottery_contract):
-    # Arrange (by fixtures)
+def test_cant_enter_unless_started(lottery_contract):
+    # Arrange
+    if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        pytest.skip()
 
     # Act / Assert
     with pytest.raises(exceptions.VirtualMachineError):
@@ -31,8 +36,10 @@ def test_cant_enter_unless_started(check_local_blockchain_envs, lottery_contract
         )
 
 
-def test_can_start_and_enter_lottery(check_local_blockchain_envs, lottery_contract):
-    # Arrange (by fixtures)
+def test_can_start_and_enter_lottery(lottery_contract):
+    # Arrange
+    if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        pytest.skip()
 
     account = get_account()
     lottery_contract.startLottery({"from": account})
@@ -44,8 +51,10 @@ def test_can_start_and_enter_lottery(check_local_blockchain_envs, lottery_contra
     assert lottery_contract.players(0) == account
 
 
-def test_can_end_lottery(check_local_blockchain_envs, lottery_contract):
-    # Arrange (by fixtures)
+def test_can_end_lottery(lottery_contract):
+    # Arrange
+    if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        pytest.skip()
 
     account = get_account()
     lottery_contract.startLottery({"from": account})
@@ -57,8 +66,10 @@ def test_can_end_lottery(check_local_blockchain_envs, lottery_contract):
     assert lottery_contract.lottery_state() == 2
 
 
-def test_can_pick_winner_correctly(check_local_blockchain_envs, lottery_contract):
-    # Arrange (by fixtures)
+def test_can_pick_winner_correctly(lottery_contract):
+    # Arrange
+    if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        pytest.skip()
 
     account = get_account()
     lottery_contract.startLottery({"from": account})

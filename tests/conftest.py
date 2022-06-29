@@ -7,11 +7,5 @@ import pytest
 
 
 @pytest.fixture()
-def check_local_blockchain_envs():
-    if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        pytest.skip()
-
-
-@pytest.fixture()
 def lottery_contract():
     return deploy_lottery()
