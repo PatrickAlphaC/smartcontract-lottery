@@ -1,3 +1,7 @@
+# Update: Head to Cyfrin Updraft
+
+> **ℹ️ Important:** This repo is no longer maintained; we invite all people learning Solidity to head to [Cyfrin Updraft](https://updraft.cyfrin.io/)! The 100% free #1 smart contract education platform on earth. Developed with love by Patrick & Cyfrin <3
+
 # SmartContract Lottery
 
 This is a repo to work with and create a truely random smart contract lottery in a python environment. If you're brand new to solidity, be sure to check out [FreeCodeCamp](https://www.freecodecamp.org/news/tag/solidity/). If you're new to brownie, check out the [Brownie](https://eth-brownie.readthedocs.io/en/stable/) documentation. If you're brand new to Chainlink, check out the beginner walkthroughs in remix to [learn the basics.](https://docs.chain.link/docs/beginners-tutorial)
